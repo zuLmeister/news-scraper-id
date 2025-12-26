@@ -19,6 +19,15 @@ class ScraperWorker(QThread):
     finished_signal = pyqtSignal(str)  # path file atau empty
 
     def __init__(self, keyword: str, min_year: int, target_n: int, output_dir: str):
+        """
+        Initialize the ScraperWorker with scraping configuration and default running state.
+        
+        Parameters:
+        	keyword (str): Search keyword used to build site list and detail URLs.
+        	min_year (int): Minimum publication year to include articles.
+        	target_n (int): Target number of articles to collect before stopping.
+        	output_dir (str): Directory path where the result CSV will be saved.
+        """
         super().__init__()
         self.keyword = keyword
         self.min_year = min_year
@@ -27,6 +36,11 @@ class ScraperWorker(QThread):
         self.is_running = True
 
     def run(self):
+        """
+        Manage the scraping workflow: collect articles matching the worker's keyword, apply filters, and save results.
+        
+        Iterates configured SITES and their paginated lists until the target number of articles is reached or the worker is stopped. Filters articles by minimum year, skips duplicates, fetches each article's detail page, ignores short contents, computes a content level and context, emits progress and log messages during processing, and stops a site after several consecutive empty pages. When collection completes and the worker is still running, writes results as a CSV into the output directory and emits the finished_signal with the saved file path; on failure or if no data was collected, emits finished_signal with an empty string.
+        """
         all_data = []
         total_collected = 0
 
@@ -135,5 +149,10 @@ class ScraperWorker(QThread):
             self.finished_signal.emit("")
 
     def stop(self):
+        """
+        Request a cooperative stop of the worker.
+        
+        Sets the internal running flag to False and emits a log message indicating the process was stopped by the user.
+        """
         self.is_running = False
         self.log_signal.emit("Proses dihentikan oleh user...")
