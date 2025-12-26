@@ -6,7 +6,16 @@ from .utils import clean_date_indo
 
 
 def _clean_body(body, tags_to_remove=None):
-    """Helper untuk bersihkan body artikel dari elemen tak diinginkan"""
+    """
+    Clean an article body by removing unwanted HTML elements and returning its plain text.
+    
+    Parameters:
+        body (bs4.element.Tag or bs4.BeautifulSoup): Parsed HTML container for the article body. If falsy, an empty string is returned.
+        tags_to_remove (Iterable[str], optional): Sequence of tag names to remove from `body` before extracting text (e.g., ['script', 'style']). If omitted, no elements are removed.
+    
+    Returns:
+        str: The plain-text content of `body` with internal whitespace collapsed and surrounding whitespace stripped.
+    """
     if not body:
         return ""
     if tags_to_remove:
@@ -18,6 +27,18 @@ def _clean_body(body, tags_to_remove=None):
 
 
 def parse_detik_list(soup: BeautifulSoup):
+    """
+    Parse article entries from a Detik list/search page.
+    
+    Parameters:
+        soup (BeautifulSoup): Parsed HTML of a Detik list or search results page.
+    
+    Returns:
+        List[dict]: A list of article dictionaries. Each dictionary contains the keys:
+            - `url`: article URL as a string
+            - `title`: article title as a string
+            - `raw_date`: raw date string from the page, or an empty string if not present
+    """
     articles = []
     for item in soup.find_all('article'):
         try:
@@ -38,12 +59,32 @@ def parse_detik_list(soup: BeautifulSoup):
 
 
 def parse_detik_content(soup: BeautifulSoup) -> str:
+    """
+    Extracts and returns the cleaned article body text from a Detik article page.
+    
+    Finds the main article body container and returns its text with common noisy tags removed.
+    
+    Returns:
+    	Cleaned article text (str); empty string if the article body is not found.
+    """
     body = soup.find('div', class_='detail__body-text')
     return _clean_body(body, ['script', 'style', 'iframe', 'div', 'a', 'figure'])
 
 
 
 def parse_cnn_list(soup: BeautifulSoup):
+    """
+    Extracts article metadata (URL, title, and raw date) from a CNN Indonesia list page.
+    
+    Parameters:
+        soup (BeautifulSoup): Parsed HTML of a CNN Indonesia listing or search results page.
+    
+    Returns:
+        list[dict]: A list of dictionaries each containing:
+            - 'url' (str): Absolute article URL starting with 'https://www.cnnindonesia.com/'.
+            - 'title' (str): Article title text.
+            - 'raw_date' (str): Raw date string extracted from a <time> or date span, or an empty string if not present.
+    """
     articles = []
     for item in soup.find_all('article'):
         try:
@@ -67,12 +108,32 @@ def parse_cnn_list(soup: BeautifulSoup):
 
 
 def parse_cnn_content(soup: BeautifulSoup) -> str:
+    """
+    Extracts and returns the cleaned main article text from a CNN Indonesia article page.
+    
+    Finds the article content container (a div with class `detail_text` or `news-content`) and returns its text with noisy elements removed (`script`, `style`, `iframe`, `table`, `aside`, `figure`) and whitespace normalized.
+    
+    Returns:
+        text (str): The cleaned article body text, or an empty string if no content is found.
+    """
     body = soup.find('div', class_='detail_text') or soup.find('div', class_='news-content')
     return _clean_body(body, ['script', 'style', 'iframe', 'table', 'aside', 'figure'])
 
 
 
 def parse_liputan6_list(soup: BeautifulSoup):
+    """
+    Extract a list of articles (URL, title, and raw date) from a Liputan6 list/search page.
+    
+    Parameters:
+        soup (BeautifulSoup): Parsed HTML of a Liputan6 list page.
+    
+    Returns:
+        list[dict]: A list of dictionaries each containing:
+            - 'url' (str): Absolute article URL.
+            - 'title' (str): Article title text.
+            - 'raw_date' (str): Raw date string as found on the page (may be empty).
+    """
     articles = []
     for item in soup.find_all('article', class_='articles--iridescent-list--item'):
         try:
@@ -98,12 +159,33 @@ def parse_liputan6_list(soup: BeautifulSoup):
 
 
 def parse_liputan6_content(soup: BeautifulSoup) -> str:
+    """
+    Extracts the main article text from a Liputan6 article page.
+    
+    Parameters:
+        soup (BeautifulSoup): Parsed HTML of a Liputan6 article page.
+    
+    Returns:
+        str: Cleaned article body text with `script`, `style`, `iframe`, `figure`, article header (`div.read-page--header`), and related "baca-juga" paragraphs removed.
+    """
     body = soup.find('div', class_='article-content-body')
     return _clean_body(body, ['script', 'style', 'iframe', 'figure', 'div.read-page--header', 'p.baca-juga'])
 
 
 
 def parse_suara_list(soup: BeautifulSoup):
+    """
+    Extracts article entries (URL, title, and raw date) from a Suara list/search page.
+    
+    Parameters:
+        soup (BeautifulSoup): Parsed HTML of a Suara list or search results page.
+    
+    Returns:
+        list[dict]: List of article dictionaries with keys:
+            - 'url' (str): Absolute article URL.
+            - 'title' (str): Article headline text.
+            - 'raw_date' (str): Date string as found on the page (unparsed).
+    """
     articles = []
     for item in soup.find_all('div', class_='item-news'):
         try:
@@ -128,6 +210,12 @@ def parse_suara_list(soup: BeautifulSoup):
 
 
 def parse_suara_content(soup: BeautifulSoup) -> str:
+    """
+    Extracts the main article text from a Suara article page.
+    
+    Returns:
+        Cleaned article body text as a single string; empty string if no article body is found.
+    """
     body = soup.find('div', class_='detail-content') or soup.find('div', class_='news-detail-text')
     return _clean_body(body, ['script', 'style', 'iframe', 'figure', 'div.bacajuga', 'aside'])
 

@@ -11,6 +11,11 @@ from scraper.worker import ScraperWorker
 
 class NewsScraperApp(QMainWindow):
     def __init__(self):
+        """
+        Initialize the main window and build the user interface.
+        
+        Sets the window title and default geometry, creates the `worker` attribute (initialized to `None`), and constructs UI components by calling `init_ui`.
+        """
         super().__init__()
         self.setWindowTitle("Indo News Scraper Pro")
         self.setGeometry(100, 100, 800, 600)
@@ -18,6 +23,11 @@ class NewsScraperApp(QMainWindow):
         self.init_ui()
 
     def init_ui(self):
+        """
+        Constructs and configures the main window's widgets, layouts, and signal connections.
+        
+        Creates and places the keyword input, minimum-year and target spin boxes (year range 2000–2030, default 2020; target range 1–1000, default 50), an output-folder display defaulting to the current working directory with a selector button, a read-only dark-themed monospaced log viewer, a progress bar, and START/STOP buttons. Connects the folder button to select_folder, the start button to start_scraping, and the stop button to stop_scraping, and initializes widget state (stop button disabled).
+        """
         central = QWidget()
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
@@ -84,15 +94,31 @@ class NewsScraperApp(QMainWindow):
         layout.addLayout(btn_layout)
 
     def select_folder(self):
+        """
+        Open a folder selection dialog and update the output-folder display with the chosen path.
+        
+        If the user selects a directory, set the `lbl_folder` widget's text to that directory path; do nothing if the dialog is cancelled.
+        """
         folder = QFileDialog.getExistingDirectory(self, "Pilih Folder Output")
         if folder:
             self.lbl_folder.setText(folder)
 
     def log(self, text: str):
+        """
+        Append a message to the UI log box and scroll the log view to the bottom.
+        
+        Parameters:
+            text (str): Message to append to the log display.
+        """
         self.log_box.append(text)
         self.log_box.verticalScrollBar().setValue(self.log_box.verticalScrollBar().maximum())
 
     def start_scraping(self):
+        """
+        Initiates a scraping run using the current UI inputs and transitions the UI into a running state.
+        
+        If the keyword input is empty, shows a warning and aborts. Otherwise, clears the log, resets and configures the progress bar, disables relevant inputs and the start button while enabling the stop button, constructs a ScraperWorker with the current keyword, minimum year, target count, and output directory, connects the worker's log, progress, and finished signals to the UI handlers, and starts the worker.
+        """
         keyword = self.inp_keyword.text().strip()
         if not keyword:
             QMessageBox.warning(self, "Error", "Keyword tidak boleh kosong!")
@@ -119,10 +145,23 @@ class NewsScraperApp(QMainWindow):
         self.worker.start()
 
     def stop_scraping(self):
+        """
+        Request the running scraper worker to stop if one exists and is active.
+        
+        If a worker instance is present and currently running, this method calls its `stop()` method to request cancellation.
+        """
         if self.worker and self.worker.isRunning():
             self.worker.stop()
 
     def on_finished(self, filepath: str):
+        """
+        Restore UI controls to their idle state and notify the user when the scraping worker finishes.
+        
+        If `filepath` is a non-empty string, informs the user that data was saved at that path; otherwise informs the user that the process completed with no results or was cancelled.
+        
+        Parameters:
+            filepath (str): Path to the saved output file if scraping produced a result, or an empty string when there is no output.
+        """
         self.btn_start.setEnabled(True)
         self.btn_stop.setEnabled(False)
         self.inp_keyword.setEnabled(True)
