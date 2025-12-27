@@ -16,10 +16,10 @@ Scraper berita Indonesia dari berbagai portal berita populer (detik.com, kompas.
 | Portal              | Status     | Catatan                              |
 |---------------------|------------|--------------------------------------|
 | detik.com           | ✅ Aktif   | termasuk detikHealth, detikFinance   |
-| kompas.com          | ✅ Aktif   | termasuk tren & olahraga             |
+| suara.com          | ✅ Aktif   | termasuk tren & olahraga             |
 | cnnindonesia.com    | ✅ Aktif   |                                      |
 | tribunnews.com      | ⚠️ Parsial| beberapa kategori kadang berubah     |
-| liputan6.com        | ✅ Aktif   |                                      |
+| liputan6.com        | 🔧 Testing | masih dalam pengembangan             |
 | viva.co.id          | 🔧 Testing | masih dalam pengembangan             |
 
 ## Instalasi
